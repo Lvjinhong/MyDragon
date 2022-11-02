@@ -2,6 +2,7 @@
 #include <graphics.h>
 #include "GlobalGame.h"
 #include "rankUI.h"
+using namespace std;
 UserUI::UserUI() :setFocus(-1)
 {
 	characterSize = Settings::Width / 25.f;
@@ -30,25 +31,25 @@ UserUI::UserUI() :setFocus(-1)
 		L"退出登录", Settings::GlobalFont,
 		characterSize,
 		Settings::NotSeleted,
-		sf::Vector2f(Settings::Width / 5.0f * 3.0f, Settings::Height / 5.f )
+		sf::Vector2f(Settings::Width / 5.0f * 3.0f, Settings::Height / 5.f)
 	);
 	gotoText[4].set(
 		L"更新记录", Settings::GlobalFont,
 		characterSize,
 		Settings::NotSeleted,
-		sf::Vector2f(Settings::Width / 5.0f * 3.0f, Settings::Height / 5.f*2 )
+		sf::Vector2f(Settings::Width / 5.0f * 3.0f, Settings::Height / 5.f * 2)
 	);
 	gotoText[5].set(
 		L"排行榜", Settings::GlobalFont,
 		characterSize,
 		Settings::NotSeleted,
-		sf::Vector2f(Settings::Width / 5.f*2, Settings::Height / 5.f * 4)
+		sf::Vector2f(Settings::Width / 5.f * 2, Settings::Height / 5.f * 4)
 	);
 
 	returnBox.updateBox(Settings::filesImages[12], 1 / 6.0f);
 	returnBox.setPosition(Settings::Width / 15.0f + 20, Settings::Width / 15.0f);
 
-	ConnectDatabase(); //连接数据库
+	GlobalGame::isLixian = ConnectDatabase(); //连接数据库
 	sf::String temp(Settings::BgImageFiles[3]);
 
 	//loadimage(&myImage, temp.toAnsiString().c_str(), Settings::Width, Settings::Height);
@@ -64,7 +65,13 @@ void UserUI::processEvent(sf::RenderWindow& window)
 		setFocus = 0;
 		if (!GlobalGame::mouse.lock && sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		{
-			logIn();
+			if (GlobalGame::isLixian) {
+				logIn_Lixian();
+			}
+			else {
+				logIn();
+			}
+
 			return;
 		}
 	}
@@ -153,23 +160,23 @@ void UserUI::updateUI(sf::Time delta)
 			L"欢迎你 : " + sf::String(GlobalGame::MyUsername), Settings::GlobalFont,
 			characterSize,
 			Settings::NotSeleted,
-			sf::Vector2f(Settings::Width / 5.0f+70 , Settings::Height / 5.f+20 )
+			sf::Vector2f(Settings::Width / 5.0f + 70, Settings::Height / 5.f + 20)
 		);
 		UserText[2].set(L"历史记录:" + sf::String(to_string(GlobalGame::HistoryScore)), Settings::GlobalFont,
 			characterSize,
 			Settings::NotSeleted,
-			sf::Vector2f(Settings::Width / 5.0f+70, Settings::Height / 5.f * 2.0f+20));
+			sf::Vector2f(Settings::Width / 5.0f + 70, Settings::Height / 5.f * 2.0f + 20));
 	}
 	else {
 		UserText[1].set(
 			GlobalGame::MyUsername, Settings::GlobalFont,
 			characterSize,
 			Settings::NotSeleted,
-			sf::Vector2f(Settings::Width / 5.0f+70 , Settings::Height / 5.f+20) );
+			sf::Vector2f(Settings::Width / 5.0f + 70, Settings::Height / 5.f + 20));
 		UserText[2].set(L"", Settings::GlobalFont,
 			characterSize,
 			Settings::NotSeleted,
-			sf::Vector2f(Settings::Width / 5.0f+70, Settings::Height / 5.f * 2.0f+20));
+			sf::Vector2f(Settings::Width / 5.0f + 70, Settings::Height / 5.f * 2.0f + 20));
 
 	}
 
@@ -195,14 +202,14 @@ bool UserUI::ConnectDatabase()
 	if (!(mysql_real_connect(&mysql, DataBase_Host, DataBase_UserName, DataBase_Password, DataBase_Name, DataBase_Port, NULL, 0))) //中间分别是主机，用户名，密码，数据库名，端口号（可以写默认0或者3306等），可以先写成参数再传进去
 	{
 		printf("Error connecting to database:%s\n", mysql_error(&mysql));
-		MessageBoxA(NULL, "连接服务器失败！", "错误", MB_OK | MB_ICONEXCLAMATION);
-		return false;
+		int t = MessageBoxA(NULL, "连接服务器失败！\n是否启动离线模式？", "错误", MB_YESNO | MB_ICONEXCLAMATION);
+		return  t == 6 ? true : false;
 	}
 	else
 	{
 		//MessageBoxA(NULL, "连接MYSQL数据成功！", "消息", MB_OK);
 		printf("Connected Successful\n");
-		return true;
+		return false;//不开启离线模式
 	}
 }
 
@@ -212,7 +219,39 @@ void UserUI::FreeConnect()
 	//mysql_free_result(res);
 	mysql_close(&mysql);
 }
-
+//离线版本的登录函数
+void UserUI::logIn_Lixian() {
+	initgraph(0, 0);
+	ifstream f;
+	f.open("./Username.csv", ios::in);
+	string s;
+	stringstream ss;
+	int F = 0;
+	char pt1[20], pt2[20];
+	InputBox(pt1, 20, "请输入用户名");
+	InputBox(pt2, 20, "请输入密码");
+	while (getline(f, s)) {
+		ss << s;
+		string temp[2];
+		for (int i = 0; i < 2; i++) {
+			getline(ss, temp[i], ',');
+		}
+		string InputUsrname(pt1), InputPassword(pt2);
+		//cout << row[0] << " " << row[1] <<" " << row[2] << endl;
+		if (InputUsrname == temp[0] && InputPassword ==temp[1]) {
+			F = 1;
+			MessageBoxA(NULL, "欢迎来到戏龙珠！", "登录成功", MB_OK | MB_ICONINFORMATION);
+			GlobalGame::MyUsername = InputUsrname;
+			GlobalGame::MyPassword = InputPassword;
+			//GlobalGame::HistoryScore = atoi(row[2]);
+			GlobalGame::isLogin = true;
+		}
+		if (!F)
+			F = MessageBoxA(NULL, "登录失败，请检查用户名或密码是否错误！", "温馨提示", MB_RETRYCANCEL | MB_ICONEXCLAMATION);
+	}
+	f.close();
+	closegraph();
+}
 void UserUI::logIn()
 {
 	//initgraph(Settings::Width, Settings::Height);

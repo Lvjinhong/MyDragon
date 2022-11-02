@@ -51,7 +51,7 @@ std::shared_ptr<UI> GlobalGame::TmpUIptr = nullptr;
 std::shared_ptr<UI> GlobalGame::TmpGameUIptr = nullptr;
 Check GlobalGame::mouse = Check();
 Check GlobalGame::keyboard = Check();
-
+bool GlobalGame::isLixian=false;
 bool GlobalGame::isLogin = false;
 std::string GlobalGame::MyUsername("Please Login");
 sf::String GlobalGame::MyPassword;

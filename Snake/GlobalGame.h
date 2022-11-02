@@ -33,7 +33,7 @@ public:
 	static sf::String MyPassword;
 	static int HistoryScore;
 	static bool isLogin;
-	
+	static bool isLixian;
 
 	static sf::Music bgMusic;
 private:

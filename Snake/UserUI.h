@@ -44,8 +44,9 @@ public:
 	void update(int score);
 	bool ConnectDatabase(); //º¯ÊýÉêÃ÷
 	void FreeConnect();   //ÊÍ·Å×ÊÔ´
-	void logIn();//×¢²á¼ì²â
-	void signUp();//µÇÂ¼¼ì²â
+	void logIn();//µÇÂ¼
+	void logIn_Lixian();
+	void signUp();//×¢²á¼ì²â
 	void modify();
 
 
