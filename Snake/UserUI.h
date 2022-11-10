@@ -47,8 +47,10 @@ public:
 	void logIn();//µÇÂ¼
 	void logIn_Lixian();
 	void signUp();//×¢²á¼ì²â
+	void signup_Lixian();
 	void modify();
-
+	void modify_Lixian();
+	void update_Lixian();
 
 	char* U2G(const char* utf8);
 	string G2U(string gbkStr);

@@ -238,7 +238,7 @@ void UserUI::logIn_Lixian() {
 		}
 		string InputUsrname(pt1), InputPassword(pt2);
 		//cout << row[0] << " " << row[1] <<" " << row[2] << endl;
-		if (InputUsrname == temp[0] && InputPassword ==temp[1]) {
+		if (InputUsrname == temp[0] && InputPassword == temp[1]) {
 			F = 1;
 			MessageBoxA(NULL, "欢迎来到戏龙珠！", "登录成功", MB_OK | MB_ICONINFORMATION);
 			GlobalGame::MyUsername = InputUsrname;
@@ -252,12 +252,10 @@ void UserUI::logIn_Lixian() {
 	f.close();
 	closegraph();
 }
+
 void UserUI::logIn()
 {
-	//initgraph(Settings::Width, Settings::Height);
 	initgraph(0, 0);
-	//putimage(0, 0, &myImage);
-
 	char pt1[20], pt2[20];
 
 	while (1) {
@@ -293,12 +291,58 @@ void UserUI::logIn()
 	}
 	closegraph();
 }
+void UserUI::signup_Lixian() {
+	initgraph(0, 0);
+	while (1) {
+		char t1[20], t2[20];
+		InputBox(t1, 20, "请输入注册用户名");
+		InputBox(t2, 20, "请输入注册密码");
+		fstream fs("./Username.csv", ios::in);
+		string username(t1), password(t2);
+		if (!fs) { //打开失败
+			MessageBoxA(NULL, "出错啦！", "温馨提示", MB_RETRYCANCEL | MB_ICONEXCLAMATION);
+			return;
+		}
+		stringstream ss;
+		string temp;
+		int f = 0;
+		while (getline(fs, temp)) {
+			ss << temp;
+			string olduser;
+			getline(ss, olduser, ',');
+			if (username == olduser) {
+				MessageBoxA(NULL, "用户名已存在，换一个试试叭！", "温馨提示", MB_RETRYCANCEL | MB_ICONEXCLAMATION);
+				f = 1; break;
+			}
+			ss.clear();
+			ss.str("");
+		}
+		if (f == 4)continue;
+		else if (f == 2) break;
+
+		int flag = 0;
+		fs.close();
+		FILE* F = fopen("./Username.csv", "a+");
+		string tar = '\n' + username + "," + password + "," + "0";
+		int t = fprintf(F, tar.c_str());
+		if (t) {
+			MessageBoxA(NULL, "恭喜，注册成功！", "温馨提示", MB_OK | MB_ICONINFORMATION);
+			fclose(F); F = nullptr;
+			break;
+		}
+		else {
+			fclose(F);
+			F = nullptr;
+			continue;
+		}
+	}
+	closegraph();
+}
 
 void UserUI::signUp()
 {
 
 	initgraph(0, 0);
-	putimage(0, 0, &myImage);
 
 	char t1[20], t2[20];
 	char buffer[240] = {};
@@ -362,9 +406,10 @@ void UserUI::update(int score)
 		MessageBoxA(NULL, "恭喜，更新成功！", "温馨提示", MB_OK | MB_ICONINFORMATION);
 	}
 	//cout << temp << endl;
+}
+void UserUI::update_Lixian() {
 
 }
-
 
 void UserUI::modify()
 {
@@ -404,7 +449,58 @@ void UserUI::modify()
 	}
 	closegraph();
 }
+void UserUI::modify_Lixian() {
+	initgraph(0, 0);
+	char  t2[20];
+	char buffer[240] = {};
+	if (!GlobalGame::isLogin) {
+		MessageBoxA(NULL, "请先登录", "温馨提示", MB_OK | MB_ICONEXCLAMATION);
+		return;
+	}
+	fstream fs("./Username.csv", ios::in);
+	while (1) {
+		InputBox(t2, 20, "请输入新密码");
+		int f = 0;
+		string username = GlobalGame::MyUsername;
+		string password(t2);
+		stringstream ss ;
+		string temp ;
+		
+		while (getline(fs, temp)) {
+			ss << temp;
+			string olduser;
+			getline(ss, olduser, ',');
+			if (username == olduser) {
+				
 
+
+				f = 1; break;
+			}
+			ss.clear();
+			ss.str("");
+		}
+
+		//注册成功与失败进行判定
+		if (t == 1) {
+			MessageBoxA(NULL, "恭喜，修改成功！", "温馨提示", MB_OK | MB_ICONINFORMATION);
+		}
+		else {
+			f = MessageBoxA(NULL, "修改失败，请稍后再试！", "温馨提示", MB_RETRYCANCEL | MB_ICONEXCLAMATION);
+		}
+		if (f != 4)break;
+	}
+	
+	if (f == 4)continue;
+	else if (f == 2) break;
+
+	int flag = 0;
+	fs.close();
+	FILE* F = fopen("./Username.csv", "a+");
+	string tar = '\n' + username + "," + password + "," + "0";
+	int t = fprintf(F, tar.c_str());
+
+	closegraph();
+}
 
 /*封装转码函数 分别为UTF8转到GBK，以及GBK转到UTF8
 主要为了解决VS与数据库之间中文字符乱码问题*/
